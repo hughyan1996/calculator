@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>多方支付計算機</title>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@2.33.0/dist/full.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <div id="app" class="bg-[#f6f5f2] flex text-black">
+    <!-- 左邊menu -->
+    <div class="bg-white w-[200px] text-center">
+      <button class="btn btn-secondary w-[150px] px-0 my-4 text-white">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" class="w-6 h-6 mb-1">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>        
+        新增支付</button>
+      <ul class="menu">
+        <li v-for="(item,index) in payItem" :key="index" :class="{'border-r-4 border-secondary text-secondary': index == tab}"><a @click="ChoosePay(index)" class="border-b-[1px] justify-center active:bg-white">{{ item }}</a></li>
+      </ul>
+    </div>
+    <!-- 中間詳細內容 -->
+    <div class="mx-4 mt-16 flex-1">
+      <div class="bg-white rounded-md py-5 w-[420px]">
+        <div class="flex justify-between mx-8 items-center">
+          <span class="text-3xl font-bold">金額</span>
+          <span class="text-6xl">${{totalMoney}}</span>
+        </div>
+      </div>
+      <div class="bg-white rounded-md border-2 border-secondary mt-4 py-5 w-[420px]">
+        <div class="flex justify-between mx-4 items-center">
+          <span class="text-xl font-bold">實收</span>
+          <span class="text-3xl">{{ myPay != '' ? calculatorMoney : '' }}</span>
+        </div>
+        <div class="flex justify-between mx-4 mt-8 items-center">
+          <span class="text-xl font-bold">剩餘</span>
+          <span class="text-3xl">{{ myPay != '' && (needPayMoney - calculatorMoney > 0) ? (needPayMoney - calculatorMoney) : '' }}</span>
+        </div>
+        <div class="flex justify-between mx-4 mt-8 items-center">
+          <span class="text-xl font-bold">找零</span>
+          <span class="text-3xl">{{ myPay != '' && (needPayMoney - calculatorMoney <= 0) ? -(needPayMoney - calculatorMoney) : '' }}</span>
+        </div>
+      </div>
+      <template v-if="myPay">
+        <div v-for="(item,index) in myPay" :key="index" class="bg-secondary rounded-md border-2 border-secondary mt-2 py-2 w-[420px]">
+          <div class="flex justify-between mx-4 items-center">
+            <span class="font-bold w-[30%]">{{ item.payItem }}</span>
+            <span class="font-bold w-[50%]">{{ item.money ? item.money : calculatorMoney }}</span>
+            <button @click="removeMyPay(index)" class="btn btn-secondary btn-xs">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+              </svg>              
+            </button>
+          </div>
+        </div>
+      </template>
+    </div>
+    <!-- 右側計算機 -->
+    <div class="bg-[#3D4353] w-[400px] flex flex-col items-center pt-16">
+      <div class="grid grid-cols-3 gap-1">
+        <button @click="addMoney('100')" class="btn min-h-[40px] h-10 w-24 bg-[#FF5F5F] text-xl text-[#747677] hover:bg-[#FF5F5F]">100</button>
+        <button @click="addMoney('500')" class="btn min-h-[40px] h-10 w-24 bg-[#FFDEA1] text-xl text-[#747677] hover:bg-[#FFDEA1]">500</button>
+        <button @click="addMoney('1000')" class="btn min-h-[40px] h-10 w-24 bg-[#00F5F5] text-xl text-[#747677] hover:bg-[#00F5F5]">1000</button>
+      </div>
+      <div class="grid grid-cols-3 gap-1 mt-8">
+        <button @click="addMoney('1')" class="btn h-[96px] w-24 bg-[#D9D9D9] text-4xl text-[#747677] rounded-[15px] hover:bg-[#D9D9D9]" >1</button>
+        <button @click="addMoney('2')" class="btn h-[96px] w-24 bg-[#D9D9D9] text-4xl text-[#747677] rounded-[15px] hover:bg-[#D9D9D9]" >2</button>
+        <button @click="addMoney('3')" class="btn h-[96px] w-24 bg-[#D9D9D9] text-4xl text-[#747677] rounded-[15px] hover:bg-[#D9D9D9]" >3</button>
+        <button @click="addMoney('4')" class="btn h-[96px] w-24 bg-[#D9D9D9] text-4xl text-[#747677] rounded-[15px] hover:bg-[#D9D9D9]" >4</button>
+        <button @click="addMoney('5')" class="btn h-[96px] w-24 bg-[#D9D9D9] text-4xl text-[#747677] rounded-[15px] hover:bg-[#D9D9D9]" >5</button>
+        <button @click="addMoney('6')" class="btn h-[96px] w-24 bg-[#D9D9D9] text-4xl text-[#747677] rounded-[15px] hover:bg-[#D9D9D9]" >6</button>
+        <button @click="addMoney('7')" class="btn h-[96px] w-24 bg-[#D9D9D9] text-4xl text-[#747677] rounded-[15px] hover:bg-[#D9D9D9]" >7</button>
+        <button @click="addMoney('8')" class="btn h-[96px] w-24 bg-[#D9D9D9] text-4xl text-[#747677] rounded-[15px] hover:bg-[#D9D9D9]" >8</button>
+        <button @click="addMoney('9')" class="btn h-[96px] w-24 bg-[#D9D9D9] text-4xl text-[#747677] rounded-[15px] hover:bg-[#D9D9D9]" >9</button>
+        <button @click="addMoney('0')" class="btn h-[96px] w-24 bg-[#D9D9D9] text-4xl text-[#747677] rounded-[15px] hover:bg-[#D9D9D9]" >0</button>
+        <button @click="addMoney('00')" class="btn h-[96px] w-24 bg-[#D9D9D9] text-4xl text-[#747677] rounded-[15px] hover:bg-[#D9D9D9]" >00</button>
+        <button @click="addMoney('backspace')" class="btn h-[96px] w-24 bg-[#747677] text-[#747677] rounded-[15px] hover:bg-[#747677]" >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-12 h-10 text-white">
+            <path fill-rule="evenodd" d="M2.515 10.674a1.875 1.875 0 000 2.652L8.89 19.7c.352.351.829.549 1.326.549H19.5a3 3 0 003-3V6.75a3 3 0 00-3-3h-9.284c-.497 0-.974.198-1.326.55l-6.375 6.374zM12.53 9.22a.75.75 0 10-1.06 1.06L13.19 12l-1.72 1.72a.75.75 0 101.06 1.06l1.72-1.72 1.72 1.72a.75.75 0 101.06-1.06L15.31 12l1.72-1.72a.75.75 0 10-1.06-1.06l-1.72 1.72-1.72-1.72z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
+      <div class="grid grid-cols-3 gap-1 mt-4">
+        <button @click="addMoney('clear')" class="btn btn-outline bg-[#3D4353] text-white h-[58px] w-24 rounded-[15px] hover:bg-[#3D4353] hover:text-white" >清除</button>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mt-8">
+        <button class="btn btn-secondary bg-white border-2 text-secondary h-20 w-[140px] rounded-[15px] text-xl hover:bg-white" >取消</button>
+        <button for="my-modal-4" class="btn btn-secondary text-white h-20 w-[140px] rounded-[15px] text-xl" >$ 確定</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script>
+    const { createApp } = Vue
+    
+    createApp({
+      data() {
+        return {
+          tab: 0, //控制左側menu active
+          index: 1, //控制下方myPay
+          payItem: ['現金','LINE Pay','禮卷','銀行刷卡','街口支付'],
+          myPay: [
+            {
+              payItem: '現金',
+              money: '',
+            }
+          ],
+          totalMoney: 5200, //總金額
+          needPayMoney: 5200, //計算還須付金額
+          calculatorMoney: '' //暫存計算機的數字
+        }
+      },
+      
+      methods: {
+        //選擇付款方式
+        ChoosePay(item) {
+          if(this.index != 0){
+            this.myPay[this.index - 1].money = this.calculatorMoney;
+            this.needPayMoney = this.needPayMoney - this.myPay[this.index - 1].money;
+          }
+          this.tab = item;
+          this.index++;
+          this.myPay.push({
+            payItem: this.payItem[this.tab],
+            money: '',
+          });
+          this.calculatorMoney = '';
+        },    
+        //刪除付款方式
+        removeMyPay(item) {
+          this.needPayMoney = this.needPayMoney + Number(this.myPay[item].money);
+          this.myPay.splice(item,1);
+          this.index--;
+          this.calculatorMoney = '';
+        },
+
+        //計算機
+        addMoney(item) {
+          //防止沒有選擇付款方式
+          if(this.myPay.length === 0) {return;}
+          //倒退鍵
+          if(item === 'backspace'){
+            this.calculatorMoney= this.calculatorMoney.slice(0, -1);
+          }
+          //清除鍵
+          else if(item === 'clear'){
+            this.calculatorMoney = '';
+          }
+          //防止0和00開頭
+          else if(item === '0' || item === '00'){
+            if(this.calculatorMoney === ''){return;}
+            this.calculatorMoney += item;
+          }
+          else{
+            this.calculatorMoney += item;
+          }
+        }
+      }
+    }).mount('#app')
+  </script>
+</body>
+</html>
