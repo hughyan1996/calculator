@@ -45,7 +45,7 @@
       </div>
       <template v-if="myPay">
         <div v-for="(item,index) in myPay" :key="index" class="bg-secondary rounded-md border-2 border-secondary mt-2 py-2 w-[420px]">
-          <div class="flex justify-between mx-4 items-center">
+          <div class="flex justify-between mx-4 items-center text-white">
             <span class="font-bold w-[30%]">{{ item.payItem }}</span>
             <span class="font-bold w-[50%]">{{ item.money ? item.money : calculatorMoney }}</span>
             <button @click="removeMyPay(index)" class="btn btn-secondary btn-xs">
