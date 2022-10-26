@@ -9,7 +9,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
-  <div id="app" class="bg-[#f6f5f2] flex text-black">
+  <div id="app" class="bg-[#f6f5f2] flex text-black h-screen">
     <!-- 左邊menu -->
     <div class="bg-white w-[200px] text-center">
       <button class="btn btn-secondary w-[150px] px-0 my-4 text-white">
@@ -131,7 +131,7 @@
         },    
         //刪除付款方式
         removeMyPay(item) {
-          this.needPayMoney = this.needPayMoney + Number(this.myPay[item].money);
+          this.needPayMoney = Number(this.needPayMoney) + Number(this.myPay[item].money);
           this.myPay.splice(item,1);
           this.index--;
           this.calculatorMoney = '';
